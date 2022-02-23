@@ -4,6 +4,7 @@ import requests
 from urllib.parse import quote
 import pymysql
 import re
+from konlpy.tag import Twitter
 
 REGION = "**********"
 endpoint = "**********"
