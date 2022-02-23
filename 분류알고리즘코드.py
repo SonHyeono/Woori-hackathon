@@ -20,7 +20,46 @@ def Classification(markets):
     category = []
 
     def etc(store):
-        return ['']
+        url_base = "https://openapi.naver.com/v1/search/webkr.json?query="
+        blog_base = "https://openapi.naver.com/v1/search/blog.json?query="
+        keyword = quote(store)
+        url_last = "&display=10$&start=1&sort=sim"
+        url_store = url_base + keyword + url_last
+        blog_store = blog_base + keyword + url_last
+
+        result = requests.get(url_store, headers=headers).json()
+        blog_result = requests.get(blog_store, headers=headers).json()
+        try:
+            display_ = result['display']
+            display_blog = blog_result['display']
+            text = ''
+            for p in range(display_ + display_blog):
+                if (p < display_):
+                    text = text + result['items'][p]['description']
+                else:
+                    text = text + blog_result['items'][p - display_]['description']
+
+            text = re.sub('[<b><b/>]', '', text)
+            text = re.sub('[-=+,#/\?:^$.@*\"※~&%ㆍ·!』\\‘’|\(\)\[\]\<\>`\'…》]', '', text)
+            text = re.sub('[0-9]+', '', text)
+
+
+            def keyword_extractor(tagger, text):
+                tokens = tagger.phrases(text)
+                tokens = [token for token in tokens if len(token) > 1]  # 한 글자인 단어는 제외
+                count_dict = [(token, text.count(token)) for token in tokens]
+                ranked_words = sorted(count_dict, key=lambda x: x[1], reverse=True)[:10]
+                return [keyword for keyword, freq in ranked_words]
+
+            if __name__ == '__main__':
+                twit = Twitter()
+                print(store)
+                print(keyword_extractor(twit, text))
+
+            return keyword_extractor(twit, text)
+
+        except:
+            return ['']
 
     def keyword_compare(naver_keyword_list):
         t = -1
